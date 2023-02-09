@@ -26,10 +26,12 @@ const fireTopMaterial = new THREE.MeshBasicMaterial({ map: getTexture(1, 13) });
 const fireSideMaterial = new THREE.MeshBasicMaterial({
   map: getTexture(0, 13),
 });
+const stoneMaterial = new THREE.MeshBasicMaterial({ map: getTexture(2, 13) });
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 
-const mesh = new THREE.Mesh(geometry, [
+const mesh = new THREE.Mesh(geometry, bottomMaterial);
+const grassMesh = new THREE.Mesh(geometry, [
   sideMaterial,
   sideMaterial,
   topMaterial,
@@ -37,8 +39,12 @@ const mesh = new THREE.Mesh(geometry, [
   sideMaterial,
   sideMaterial,
 ]);
+// mesh.receiveShadow = true;
 
 const coalMesh = new THREE.Mesh(geometry, coalMaterial);
+
+// coalMesh.castShadow = true;
+// coalMesh.receiveShadow = true;
 const fireMesh = new THREE.Mesh(geometry, [
   fireSideMaterial,
   fireSideMaterial,
@@ -48,22 +54,51 @@ const fireMesh = new THREE.Mesh(geometry, [
   fireSideMaterial,
 ]);
 
+const stoneMesh = new THREE.Mesh(geometry, stoneMaterial);
+
 class BaseBox {
   constructor(options) {
     const { position } = options;
     // this.material = new THREE.MeshBasicMaterial({ color: 0x0099cc });
     this.mesh = mesh.clone();
+    // this.mesh.castShadow = true;
+    // this.mesh.receiveShadow = true;
+    if (position) {
+      this.mesh.position.set(position.x, position.y, position.z);
+    }
+  }
+}
+class GrassBox extends BaseBox {
+  constructor(options) {
+    super(options);
+    const { position } = options;
+    // this.material = new THREE.MeshBasicMaterial({ color: 0x0099cc });
+    this.mesh = grassMesh.clone();
+    // this.mesh.castShadow = true;
+    // this.mesh.receiveShadow = true;
+    if (position) {
+      this.mesh.position.set(position.x, position.y, position.z);
+    }
+  }
+}
+class CoalBox extends BaseBox {
+  constructor(options) {
+    const { position } = options;
+    super(options);
+    this.mesh = coalMesh.clone();
+    // this.mesh.castShadow = true;
     if (position) {
       this.mesh.position.set(position.x, position.y, position.z);
     }
   }
 }
 
-class CoalBox extends BaseBox {
+class StoneBox extends BaseBox {
   constructor(options) {
     const { position } = options;
     super(options);
-    this.mesh = coalMesh.clone();
+    this.mesh = stoneMesh.clone();
+    // this.mesh.castShadow = true;
     if (position) {
       this.mesh.position.set(position.x, position.y, position.z);
     }
@@ -75,6 +110,8 @@ class FireBox extends BaseBox {
     const { position } = options;
     super(options);
     this.mesh = fireMesh.clone();
+    // this.mesh.castShadow = true;
+    // this.mesh.receiveShadow = true;
     if (position) {
       this.mesh.position.set(position.x, position.y, position.z);
     }
@@ -83,4 +120,4 @@ class FireBox extends BaseBox {
 
 export default BaseBox;
 
-export { BaseBox, CoalBox, FireBox };
+export { BaseBox, GrassBox, CoalBox, StoneBox, FireBox };
