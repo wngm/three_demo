@@ -306,14 +306,14 @@ class World {
     const velocity = this.velocity;
     const direction = this.direction;
 
+    const height = 4;
     const { moveForward, moveBackward, moveLeft, moveRight, canJump } =
       this._controls;
     if (controls.isLocked === true) {
       raycaster.ray.origin.copy(controls.getObject().position);
-      raycaster.ray.origin.y -= 4;
+      raycaster.ray.origin.y -= height;
 
       const intersections = raycaster.intersectObjects(this.blocks, false);
-
       const onObject = intersections.length > 0;
       velocity.x -= velocity.x * 10.0 * delta;
       velocity.z -= velocity.z * 10.0 * delta;
@@ -333,16 +333,27 @@ class World {
         this._controls.canJump = true;
       }
 
+      intersections.forEach((i) => {
+        const { object, distance } = i;
+        console.log(i);
+        if (distance < 1) {
+          if (distance < 1) {
+            if (raycaster.ray.origin.y - object.position.y == 1) {
+              velocity.y = 0;
+              this._controls.canJump = true;
+            }
+          }
+        }
+      });
       controls.moveRight(-velocity.x * delta);
       controls.moveForward(-velocity.z * delta);
-
       controls.getObject().position.y += velocity.y * delta; // new behavior
 
-      if (controls.getObject().position.y < 10) {
-        velocity.y = 0;
-        controls.getObject().position.y = 10;
-        this._controls.canJump = true;
-      }
+      // if (controls.getObject().position.y < 10) {
+      //   velocity.y = 0;
+      //   controls.getObject().position.y = 10;
+      //   this._controls.canJump = true;
+      // }
     }
 
     this.render();
