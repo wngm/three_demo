@@ -33,6 +33,12 @@ class World {
       0,
       10
     );
+    this.raycaster2 = new THREE.Raycaster(
+      new THREE.Vector3(),
+      new THREE.Vector3(0, -1, 0),
+      0,
+      10
+    );
     this.velocity = new THREE.Vector3();
     this.direction = new THREE.Vector3();
     this.vertex = new THREE.Vector3();
@@ -166,7 +172,7 @@ class World {
 
     this.camera.position.z = 10;
     this.camera.position.x = 10;
-    this.camera.position.y = 5;
+    this.camera.position.y = 10;
   }
   // 设置渲染器
   setRenderer() {
@@ -310,10 +316,7 @@ class World {
     const { moveForward, moveBackward, moveLeft, moveRight, canJump } =
       this._controls;
     if (controls.isLocked === true) {
-      raycaster.ray.origin.copy(controls.getObject().position);
-      raycaster.ray.origin.y -= height;
-
-      const intersections = raycaster.intersectObjects(this.blocks, false);
+      const intersections = this.getIntersections();
       const onObject = intersections.length > 0;
       velocity.x -= velocity.x * 10.0 * delta;
       velocity.z -= velocity.z * 10.0 * delta;
@@ -332,31 +335,57 @@ class World {
         velocity.y = Math.max(0, velocity.y);
         this._controls.canJump = true;
       }
+      let _v = new THREE.Vector3().clone(velocity);
+      _v.y = 0;
+      _v.normalize();
 
-      intersections.forEach((i) => {
-        const { object, distance } = i;
-        console.log(i);
-        if (distance < 1) {
-          if (distance < 1) {
-            if (raycaster.ray.origin.y - object.position.y == 1) {
-              velocity.y = 0;
-              this._controls.canJump = true;
-            }
-          }
-        }
-      });
+      // else {
+
+      const intersections2 = this.getIntersectionsMove(_v);
+      // console.log(intersections, intersections2);
+
+      // if (
+      //   intersections2.length > 0 &&
+      //   intersections2.find((i) => i.distance <= 0.5)
+      // ) {
+      // } else {
       controls.moveRight(-velocity.x * delta);
       controls.moveForward(-velocity.z * delta);
-      controls.getObject().position.y += velocity.y * delta; // new behavior
-
-      // if (controls.getObject().position.y < 10) {
+      controls.getObject().position.y += velocity.y * delta;
+      // }
+      // if (controls.getObject().position.y < 0) {
       //   velocity.y = 0;
-      //   controls.getObject().position.y = 10;
+      //   controls.getObject().position.y = 0;
       //   this._controls.canJump = true;
       // }
+
+      if (controls.getObject().position.y < -500) {
+        controls.getObject().position.x = 10;
+        controls.getObject().position.z = 10;
+        controls.getObject().position.y = 10;
+      }
     }
 
     this.render();
+  }
+  getIntersectionsMove(direction) {
+    let s = new THREE.Vector3();
+    this.controls.getDirection(s);
+    const height = 4;
+    this.raycaster2.ray.origin.copy(this.controls.getObject().position);
+    this.raycaster2.ray.direction.copy(direction);
+    this.raycaster.ray.origin.y -= height;
+    const intersections = this.raycaster.intersectObjects(this.blocks, false);
+    return intersections;
+  }
+  getIntersections(position) {
+    const height = -4;
+    this.raycaster.ray.origin.copy(
+      position ? position : this.controls.getObject().position
+    );
+    this.raycaster.ray.origin.y -= height;
+    const intersections = this.raycaster.intersectObjects(this.blocks, false);
+    return intersections;
   }
 
   addModel() {
