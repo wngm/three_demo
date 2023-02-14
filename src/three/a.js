@@ -54,6 +54,8 @@ class Map {
     );
 
     this.camera.position.z = 5;
+    this.camera.position.x = 5;
+    this.camera.position.y = 20;
   }
 
   // 设置渲染器
@@ -117,7 +119,7 @@ class Map {
     controls.minDistance = -200;
     controls.maxDistance = 200;
     // controls.target.set(0, -0.15, -0.2);
-    controls.target.set(-20, 0, -40);
+    controls.target.set(50, 0, 50);
     controls.autoRotate = true;
     controls.update();
 

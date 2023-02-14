@@ -31,13 +31,13 @@ class World {
       new THREE.Vector3(),
       new THREE.Vector3(0, -1, 0),
       0,
-      10
+      1
     );
     this.raycaster2 = new THREE.Raycaster(
       new THREE.Vector3(),
       new THREE.Vector3(0, -1, 0),
       0,
-      10
+      1
     );
     this.velocity = new THREE.Vector3();
     this.direction = new THREE.Vector3();
@@ -70,6 +70,7 @@ class World {
     document.addEventListener("keyup", this.onKeyUp);
     this.dom.addEventListener("click", () => {
       this.controls.lock();
+      console.log("lock");
     });
     this.controls.addEventListener("lock", function () {
       // instructions.style.display = "none";
@@ -77,6 +78,7 @@ class World {
     });
 
     this.controls.addEventListener("unlock", function () {
+      console.log("unlock");
       // blocker.style.display = "block";
       // instructions.style.display = "";
     });
@@ -164,15 +166,16 @@ class World {
   setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
     this.camera = new THREE.PerspectiveCamera(
-      75,
+      50,
       this.parentDom.offsetWidth / this.parentDom.offsetHeight,
       0.1,
       1000
     );
 
-    this.camera.position.z = 10;
-    this.camera.position.x = 10;
-    this.camera.position.y = 10;
+    this.camera.position.z = 5;
+    this.camera.position.x = 5;
+    this.camera.position.y = 20;
+    this.camera.lookAt(10, -10, 10);
   }
   // 设置渲染器
   setRenderer() {
@@ -193,7 +196,7 @@ class World {
   }
 
   setGround() {
-    let ground = new Ground();
+    const ground = new Ground();
     let blocks = ground.createGround();
     blocks.forEach((i) => {
       let mesh = new Box[i.type]({ position: i }).mesh;
@@ -215,16 +218,16 @@ class World {
     const directionalLight = new THREE.DirectionalLight("#ffffff", 1);
     directionalLight.position.set(-40, 60, -10);
 
-    directionalLight.shadow.camera.near = 20; //产生阴影的最近距离
-    directionalLight.shadow.camera.far = 200; //产生阴影的最远距离
-    directionalLight.shadow.camera.left = -50; //产生阴影距离位置的最左边位置
-    directionalLight.shadow.camera.right = 50; //最右边
-    directionalLight.shadow.camera.top = 50; //最上边
-    directionalLight.shadow.camera.bottom = -50; //最下面
+    // directionalLight.shadow.camera.near = 20; //产生阴影的最近距离
+    // directionalLight.shadow.camera.far = 200; //产生阴影的最远距离
+    // directionalLight.shadow.camera.left = -50; //产生阴影距离位置的最左边位置
+    // directionalLight.shadow.camera.right = 50; //最右边
+    // directionalLight.shadow.camera.top = 50; //最上边
+    // directionalLight.shadow.camera.bottom = -50; //最下面
 
-    //这两个值决定使用多少像素生成阴影 默认512
-    directionalLight.shadow.mapSize.height = 1024;
-    directionalLight.shadow.mapSize.width = 1024;
+    // //这两个值决定使用多少像素生成阴影 默认512
+    // directionalLight.shadow.mapSize.height = 1024;
+    // directionalLight.shadow.mapSize.width = 1024;
     // directionalLight.castShadow = true;
     this.scene.add(directionalLight);
     // this.scene.add(directionalLight.target(100, 100, 100));
@@ -269,6 +272,7 @@ class World {
     // this.controls = controls;
     this.controls = new PointerLockControls(this.camera, document.body);
     this.scene.add(this.controls.getObject());
+    // this.controls.lookAt(10, -10, 10);
     // setTimeout(() => {
     //   this.controls.lock();
     // }, 0);
@@ -315,7 +319,7 @@ class World {
     const height = 4;
     const { moveForward, moveBackward, moveLeft, moveRight, canJump } =
       this._controls;
-    if (controls.isLocked === true) {
+    if (controls.isLocked) {
       const intersections = this.getIntersections();
       const onObject = intersections.length > 0;
       velocity.x -= velocity.x * 10.0 * delta;
@@ -360,12 +364,13 @@ class World {
       // }
 
       if (controls.getObject().position.y < -500) {
-        controls.getObject().position.x = 10;
-        controls.getObject().position.z = 10;
-        controls.getObject().position.y = 10;
+        controls.getObject().position.x = 5;
+        controls.getObject().position.z = 5;
+        controls.getObject().position.y = 20;
+        // velocity.y = 0;
+        velocity.y = -1;
       }
     }
-
     this.render();
   }
   getIntersectionsMove(direction) {
@@ -379,7 +384,7 @@ class World {
     return intersections;
   }
   getIntersections(position) {
-    const height = -4;
+    const height = 2;
     this.raycaster.ray.origin.copy(
       position ? position : this.controls.getObject().position
     );
