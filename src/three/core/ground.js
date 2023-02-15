@@ -26,8 +26,8 @@ class Noise {
 class Ground {
   blocks = [];
   constructor() {
-    this.width = 100;
-    this.height = 100;
+    this.width = 50;
+    this.height = 50;
     this.fixY = 0;
     this.startY = -5;
 
