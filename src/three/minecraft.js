@@ -10,6 +10,7 @@ import { GlitchPass } from "three/addons/postprocessing/GlitchPass.js";
 import * as Box from "./units/box";
 import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise";
 import { Ground } from "./core/ground";
+import { createConditionalExpression } from "@vue/compiler-core";
 
 const { BaseBox, GrassBox, CoalBox, FireBox } = Box;
 const loader = new GLTFLoader();
@@ -35,9 +36,9 @@ class World {
     );
     this.raycaster2 = new THREE.Raycaster(
       new THREE.Vector3(),
-      new THREE.Vector3(0, -1, 0),
+      new THREE.Vector3(1, 0, 0),
       0,
-      1
+      0.5
     );
     this.velocity = new THREE.Vector3();
     this.direction = new THREE.Vector3();
@@ -116,7 +117,7 @@ class World {
         controls.moveRight = true;
         break;
       case "Space":
-        if (controls.canJump === true) this.velocity.y += 50;
+        if (controls.canJump === true) this.velocity.y += 20;
         controls.canJump = false;
         break;
 
@@ -325,7 +326,7 @@ class World {
       velocity.x -= velocity.x * 10.0 * delta;
       velocity.z -= velocity.z * 10.0 * delta;
 
-      velocity.y -= 9.8 * 20.0 * delta; // 100.0 = mass
+      velocity.y -= 9.8 * 10.0 * delta; // 100.0 = mass
 
       direction.z = Number(moveForward) - Number(moveBackward);
       direction.x = Number(moveRight) - Number(moveLeft);
@@ -339,14 +340,18 @@ class World {
         velocity.y = Math.max(0, velocity.y);
         this._controls.canJump = true;
       }
-      let _v = new THREE.Vector3().clone(velocity);
+      let _v = new THREE.Vector3().copy(velocity);
       _v.y = 0;
       _v.normalize();
 
       // else {
-
       const intersections2 = this.getIntersectionsMove(_v);
-      // console.log(intersections, intersections2);
+      if (intersections2.length > 0) {
+        velocity.x = 0;
+        velocity.z = 0;
+        let cameraDirection = new THREE.Vector3();
+        this.camera.getWorldDirection(cameraDirection);
+      }
 
       // if (
       //   intersections2.length > 0 &&
@@ -373,14 +378,28 @@ class World {
     }
     this.render();
   }
-  getIntersectionsMove(direction) {
-    let s = new THREE.Vector3();
-    this.controls.getDirection(s);
-    const height = 4;
+  crameVector() {
+    const camera = this.camera.up;
+    let _vector = new THREE.Vector3();
+    _vector.setFromMatrixColumn(camera.matrix, 0);
+
+    _vector.crossVectors(camera.up, _vector);
+
+    camera.position.addScaledVector(_vector, distance);
+    _vector.setFromMatrixColumn(camera.matrix, 0);
+
+    camera.position.addScaledVector(_vector, distance);
+  }
+  getIntersectionsMove(_direction) {
+    let direction = new THREE.Vector3().copy(_direction);
+    const height = 2;
+    direction.applyMatrix4(this.camera.matrixWorld);
+    direction.setY(0);
+    direction.normalize();
     this.raycaster2.ray.origin.copy(this.controls.getObject().position);
     this.raycaster2.ray.direction.copy(direction);
-    this.raycaster.ray.origin.y -= height;
-    const intersections = this.raycaster.intersectObjects(this.blocks, false);
+    this.raycaster2.ray.origin.y -= height;
+    const intersections = this.raycaster2.intersectObjects(this.blocks, false);
     return intersections;
   }
   getIntersections(position) {

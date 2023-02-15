@@ -1,1 +1,0 @@
-import{r as a,n as o,o as s,c as r,M as t,a as _}from"./index-431561ab.js";const p={__name:"Main",setup(c){const n=a(null);return a(2),o(()=>{const e=new t({dom:n.value});_(e),console.log("info ",e.renderer.info)}),(e,l)=>(s(),r("div",{class:"three",ref_key:"box",ref:n},null,512))}};export{p as default};

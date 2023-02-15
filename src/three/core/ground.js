@@ -26,8 +26,8 @@ class Noise {
 class Ground {
   blocks = [];
   constructor() {
-    this.width = 20;
-    this.height = 20;
+    this.width = 100;
+    this.height = 100;
     this.fixY = 0;
     this.startY = -5;
 
@@ -75,6 +75,7 @@ class Ground {
         }
       }
     }
+    blocks.push({ x: 10, y: 1, z: 10, type: "GrassBox" });
     return blocks;
   }
 }
